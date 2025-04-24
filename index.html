@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Graduation Photo Booth</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+    .step, #camera {
+      display: none;
+    }
+    .step.active, #camera.active {
+      display: block;
+    }
+    img.guide {
+      width: 100%;
+      height: auto;
+    }
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    #icon-box {
+      position: absolute;
+      top: 5%;
+      right: 4%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 130px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #btn, .next-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #fff;
+      color: #000;
+      text-decoration: none;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Step 1: Welcome -->
+  <div id="step1" class="step active">
+    <img src="welcome.jpg" class="guide" alt="Welcome to University of Nottingham Jubilee Campus">
+    <button class="next-btn" onclick="goToStep(2)">Next</button>
+  </div>
+
+  <!-- Step 2: Direction -->
+  <div id="step2" class="step">
+    <img src="guide.jpg" class="guide" alt="Classroom direction">
+    <button class="next-btn" onclick="startCamera()">Start Camera</button>
+  </div>
+
+  <!-- Step 3: Camera Mode -->
+  <div id="camera">
+    <video id="v" autoplay playsinline></video>
+    <div id="icon-box">
+      <div>🖊</div>
+      <div>📓</div>
+    </div>
+    <a id="btn">📸 Take Photo</a>
+  </div>
+
+  <script>
+    function goToStep(step) {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+    }
+
+    function startCamera() {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('camera').classList.add('active');
+
+      const v = document.getElementById('v');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(s => v.srcObject = s)
+        .catch(e => alert('Camera access error: ' + e.message));
+
+      const btn = document.getElementById('btn');
+      btn.onclick = () => {
+        const c = document.createElement('canvas');
+        c.width = v.videoWidth;
+        c.height = v.videoHeight;
+        const ctx = c.getContext('2d');
+
+        // Mirror camera
+        ctx.translate(c.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(v, 0, 0, c.width, c.height);
+
+        // Draw 🖊 and 📓 vertically at right side
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.font = "130px sans-serif";
+        ctx.textAlign = "right";
+
+        ctx.fillText("🖊", c.width * 0.96, c.height * 0.2); // Top-right
+        ctx.fillText("📓", c.width * 0.96, c.height * 0.6); // Below it
+
+        const url = c.toDataURL('image/jpeg');
+        btn.href = url;
+        btn.download = 'photo.jpg';
+        btn.innerText = '⬇ Download Photo';
+      };
+    }
+  </script>
+</body>
+</html>
