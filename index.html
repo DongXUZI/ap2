@@ -21,6 +21,24 @@
       width: 100%;
       height: auto;
     }
+    .emoji-options {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      font-size: 100px;
+    }
+    .emoji-options div {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .emoji-options div:hover {
+      transform: scale(1.2);
+    }
+    .msg {
+      margin-top: 10px;
+      color: red;
+    }
     video {
       position: absolute;
       top: 0;
@@ -29,6 +47,7 @@
       height: 100%;
       object-fit: cover;
       transform: scaleX(-1);
+      z-index: 1;
     }
     #icon-box {
       position: absolute;
@@ -36,8 +55,8 @@
       right: 4%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      font-size: 130px;
+      align-items: right;
+      font-size: 200px;
       z-index: 2;
       pointer-events: none;
     }
@@ -61,23 +80,31 @@
 
   <!-- Step 1: Welcome -->
   <div id="step1" class="step active">
-    <img src="welcome.jpg" class="guide" alt="Welcome to University of Nottingham Jubilee Campus">
+    <img src="welcome.jpg" class="guide" alt="Welcome to Nottingham">
     <button class="next-btn" onclick="goToStep(2)">Next</button>
   </div>
 
-  <!-- Step 2: Direction -->
+  <!-- Step 2: Emoji Quiz -->
   <div id="step2" class="step">
+    <p style="margin-top: 120px; font-size: 60px;">Which emoji best represents this moment?</p>
+    <div class="emoji-options">
+      <div onclick="checkAnswer('🤡')">🤡</div>
+      <div onclick="checkAnswer('📖')">📖</div>
+      <div onclick="checkAnswer('🛹')">🛹</div>
+    </div>
+    <div id="quiz-msg" class="msg"></div>
+  </div>
+
+  <!-- Step 3: Guide -->
+  <div id="step3" class="step">
     <img src="guide.jpg" class="guide" alt="Classroom direction">
     <button class="next-btn" onclick="startCamera()">Start Camera</button>
   </div>
 
-  <!-- Step 3: Camera Mode -->
+  <!-- Step 4: Camera -->
   <div id="camera">
     <video id="v" autoplay playsinline></video>
-    <div id="icon-box">
-      <div>🖊</div>
-      <div>📓</div>
-    </div>
+    <div id="icon-box">📖</div>
     <a id="btn">📸 Take Photo</a>
   </div>
 
@@ -85,6 +112,15 @@
     function goToStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step' + step).classList.add('active');
+    }
+
+    function checkAnswer(choice) {
+      const msg = document.getElementById('quiz-msg');
+      if (choice === '📖') {
+        goToStep(3);
+      } else {
+        msg.textContent = "Try again!";
+      }
     }
 
     function startCamera() {
@@ -108,13 +144,11 @@
         ctx.scale(-1, 1);
         ctx.drawImage(v, 0, 0, c.width, c.height);
 
-        // Draw 🖊 and 📓 vertically at right side
+        // Draw backpack emoji on the right side
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.font = "130px sans-serif";
+        ctx.font = "150px sans-serif";
         ctx.textAlign = "right";
-
-        ctx.fillText("🖊", c.width * 0.96, c.height * 0.2); // Top-right
-        ctx.fillText("📓", c.width * 0.96, c.height * 0.6); // Below it
+        ctx.fillText("📖", c.width * 0.95, c.height * 0.65);
 
         const url = c.toDataURL('image/jpeg');
         btn.href = url;
